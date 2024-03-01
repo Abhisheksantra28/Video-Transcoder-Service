@@ -11,12 +11,11 @@ const { VIDEO_PROCESS_STATES } = require("./utils/constants");
 
 require("dotenv").config();
 
-const markTaskCompleted = async (userId, videoId, allFilesObject) => {
+const markTaskCompleted = async ( videoId, allFilesObject) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
     const response = await axios.post(webhook, {
-      userID: userId,
       videoId,
       progress: VIDEO_PROCESS_STATES.COMPLETED,
       videoResolutions: allFilesObject,
@@ -31,12 +30,11 @@ const markTaskCompleted = async (userId, videoId, allFilesObject) => {
   }
 };
 
-const markTaskFailed = async (userId, videoId) => {
+const markTaskFailed = async ( videoId) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
     const response = await axios.post(webhook, {
-      userID: userId,
       videoId,
       progress: VIDEO_PROCESS_STATES.FAILED,
       videoResolutions: {},
@@ -154,7 +152,7 @@ let videoFormat = [
         }
       });
 
-      markTaskCompleted(userId, videoToProcess, allFilesObject);
+      markTaskCompleted( videoToProcess, allFilesObject);
     } else {
       const failedResults = results.filter(
         (result) => result.status === "rejected"
@@ -176,7 +174,7 @@ let videoFormat = [
         );
       }
 
-      markTaskFailed(userId, videoToProcess);
+      markTaskFailed(videoToProcess);
 
       process.exit(1);
     }
