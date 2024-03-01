@@ -8,7 +8,7 @@ const runParallelFFmpegCommands = async (commands) => {
   const results = [];
   const promises = commands.map((ffmpegCommand, index) => {
     try {
-      const { stdout, stderr } = exec(`ffmpeg ${ffmpegCommand}`);
+      const { stdout, stderr } = exec(ffmpegCommand);
       results.push({ stdout, stderr });
     } catch (error) {
       console.error(`FFmpeg process failed for command ${index + 1}:`, error);
