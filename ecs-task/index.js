@@ -143,9 +143,7 @@ let videoFormat = [
       let allFilesObject = {};
 
       allFiles.map((file) => {
-        if (file.includes("144p")) {
-          allFilesObject["144p"] = file;
-        } else if (file.includes("360p")) {
+        if (file.includes("360p")) {
           allFilesObject["360p"] = file;
         } else if (file.includes("480p")) {
           allFilesObject["480p"] = file;
