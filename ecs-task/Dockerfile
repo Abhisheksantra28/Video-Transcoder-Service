@@ -9,6 +9,7 @@ RUN apt-get install -y nodejs
 WORKDIR /app
 
 COPY index.js index.js
+COPY utils/ utils/
 COPY package*.json .
 
 RUN npm install
