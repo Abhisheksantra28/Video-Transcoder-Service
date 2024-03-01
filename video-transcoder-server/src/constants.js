@@ -11,9 +11,10 @@ const VIDEO_PROCESS_STATES = {
     VIDEO_TRANSCODING_QUEUE: "VIDEO_TRANSCODING_QUEUE",
   };
   
-  // export this enum
+  const DB_NAME="video-transcoding-service"
   
   module.exports = {
     VIDEO_PROCESS_STATES,
     REDIS_KEYS,
+    DB_NAME
   };
