@@ -23,11 +23,6 @@ const videoSchema = new mongoose.Schema(
     type: {
       type: String,
     },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
     progress: {
       type: String,
       enum: ["pending", "processing", "completed", "failed", "queued"],
