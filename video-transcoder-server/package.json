@@ -3,12 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "dependencies": {
-    "@aws-sdk/client-ecs": "^3.523.0",
-    "@aws-sdk/client-s3": "^3.523.0",
-    "@aws-sdk/s3-request-presigner": "^3.523.0",
+    "@aws-sdk/client-ecs": "^3.525.0",
+    "@aws-sdk/client-s3": "^3.525.0",
+    "@aws-sdk/s3-request-presigner": "^3.525.0",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "ioredis": "^5.3.2",
     "mongoose": "^8.2.0",
     "serverless-http": "^3.1.1"
+  },
+  "devDependencies": {
+    "serverless-dotenv-plugin": "^6.0.0",
+    "serverless-offline": "^13.3.3"
   }
 }
