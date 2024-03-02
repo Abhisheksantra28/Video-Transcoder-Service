@@ -1,6 +1,6 @@
 const Redis = require("ioredis");
 const { REDIS_KEYS } = require("../constants.js");
-const { asyncHander } = require("../utils/asyncHandler.js");
+
 
 const redis = new Redis(process.env.REDIS_URL);
 

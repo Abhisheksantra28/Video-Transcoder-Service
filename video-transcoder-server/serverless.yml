@@ -1,12 +1,22 @@
-service: video-transcoder
+service: video-transcoder-server
 frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: nodejs18.x
+  region: ap-south-1
+  environment:
+    basePath: ./
+    REDIS_URL: ${env:REDIS_URL}
+    MONGO_URI: ${env:MONGO_URI}
+
+plugins:
+  - serverless-offline
+  - serverless-dotenv-plugin
+useDotenv: true
 
 functions:
   api:
-    handler: index.handler
+    handler: ./src/index.handler
     events:
       - httpApi: '*'

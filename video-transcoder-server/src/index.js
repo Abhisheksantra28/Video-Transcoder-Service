@@ -1,6 +1,10 @@
 const serverless = require("serverless-http");
 const express = require("express");
+const  transcoderRoutes = require("./routes/transcoder.route.js");
 const app = express();
+
+app.use(express.json());
+
 
 app.get("/", (req, res, next) => {
   return res.status(200).json({
@@ -8,11 +12,7 @@ app.get("/", (req, res, next) => {
   });
 });
 
-app.get("/path", (req, res, next) => {
-  return res.status(200).json({
-    message: "Hello from path!",
-  });
-});
+app.use("/api/v1/video", transcoderRoutes);
 
 app.use((req, res, next) => {
   return res.status(404).json({
