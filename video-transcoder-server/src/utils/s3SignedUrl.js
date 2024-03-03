@@ -17,25 +17,25 @@ const s3Client = new S3Client({
   },
 });
 
-
 async function getObjectURL(key) {
-    const command = new GetObjectCommand({
-      Bucket: "video-transcoder-temp",
-      Key: key,
-    });
-  
-    const url = await getSignedUrl(s3Client, command);
-    return url;
-  }
-  
-  async function putObjectURL(fileName, contentType) {
-    const command = new PutObjectCommand({
-      Bucket: "video-transcoder-temp",
-      Key: `uploads/videos/${fileName}`,
-      ContentType: contentType,
-    });
-  
-    const url = await getSignedUrl(s3Client, command, { expiresIn: 180 });
-    return url;
-  }
-  
+  const command = new GetObjectCommand({
+    Bucket: process.env.TEMP_S3_BUCKET_NAME,
+    Key: key,
+  });
+
+  const url = await getSignedUrl(s3Client, command);
+  return url;
+}
+
+async function putObjectURL(fileName, contentType) {
+  const command = new PutObjectCommand({
+    Bucket: process.env.TEMP_S3_BUCKET_NAME,
+    Key: `uploads/videos/${fileName}`,
+    ContentType: contentType,
+  });
+
+  const url = await getSignedUrl(s3Client, command, { expiresIn: 180 });
+  return url;
+}
+
+module.exports = { getObjectURL, putObjectURL };
