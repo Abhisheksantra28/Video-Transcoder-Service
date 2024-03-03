@@ -11,12 +11,12 @@ const { VIDEO_PROCESS_STATES } = require("./utils/constants");
 
 require("dotenv").config();
 
-const markTaskCompleted = async ( videoId, allFilesObject) => {
+const markTaskCompleted = async ( key, allFilesObject) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
     const response = await axios.post(webhook, {
-      videoId,
+      key,
       progress: VIDEO_PROCESS_STATES.COMPLETED,
       videoResolutions: allFilesObject,
     });
@@ -30,12 +30,12 @@ const markTaskCompleted = async ( videoId, allFilesObject) => {
   }
 };
 
-const markTaskFailed = async ( videoId) => {
+const markTaskFailed = async ( key) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
     const response = await axios.post(webhook, {
-      videoId,
+      key,
       progress: VIDEO_PROCESS_STATES.FAILED,
       videoResolutions: {},
     });
@@ -63,8 +63,11 @@ let videoFormat = [
   try {
     console.log("Starting.....");
 
-    const videoToProcess = process.env.VIDEO_NAME;
-    const userId = process.env.USER_ID;
+    const videoToProcess = process.env.OBJECT_KEY;
+    const key = videoToProcess;
+    const bucketName = process.env.TEMP_S3_BUCKET_NAME;
+    const finalBucketName = process.env.FINAL_S3_BUCKET_NAME;
+
 
     if (!videoToProcess) {
       console.error(
@@ -72,16 +75,7 @@ let videoFormat = [
       );
       process.exit(1);
     }
-
-    if (!userId) {
-      console.error(
-        "Missing environment variable: USER_ID. Please set the environment variable with your user ID."
-      );
-      process.exit(1);
-    }
-
-    const bucketName = process.env.TEMP_S3_BUCKET_NAME;
-    const key = videoToProcess;
+   
     const url = await generateSignedGetUrl({ key, bucketName });
 
     if (!url) {
@@ -109,7 +103,6 @@ let videoFormat = [
 
     checkIfFileExists(allFiles);
 
-    const finalBucketName = process.env.FINAL_S3_BUCKET_NAME;
 
     let uploadPromises = [];
     allFiles.map((file) => {
@@ -152,7 +145,7 @@ let videoFormat = [
         }
       });
 
-      markTaskCompleted( videoToProcess, allFilesObject);
+      markTaskCompleted( key, allFilesObject);
     } else {
       const failedResults = results.filter(
         (result) => result.status === "rejected"
@@ -174,7 +167,7 @@ let videoFormat = [
         );
       }
 
-      markTaskFailed(videoToProcess);
+      markTaskFailed(key);
 
       process.exit(1);
     }
