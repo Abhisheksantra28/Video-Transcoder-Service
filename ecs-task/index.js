@@ -11,14 +11,14 @@ const { VIDEO_PROCESS_STATES } = require("./utils/constants");
 
 require("dotenv").config();
 
-const markTaskCompleted = async ( key, allFilesObject) => {
+const markTaskCompleted = async ( key, allFilesObjects) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
     const response = await axios.post(webhook, {
       key,
       progress: VIDEO_PROCESS_STATES.COMPLETED,
-      videoResolutions: allFilesObject,
+      videoResolutions: allFilesObjects,
     });
 
     if (response.status === 200) {
