@@ -20,7 +20,6 @@ const {
   VIDEO_PROCESS_STATES,
 } = require("../constants.js");
 
-const { VIDEO_PROCESS_STATES } = require("../constants.js");
 const { triggerTranscodingJob } = require("../utils/ecsTranscodingTrigger.js");
 const Video = require("../models/video.model.js");
 
