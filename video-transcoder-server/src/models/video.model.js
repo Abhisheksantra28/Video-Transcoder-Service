@@ -13,7 +13,7 @@ const videoSchema = new mongoose.Schema(
       "720p": String,
       "1080p": String,
     },
-    originalVideoId: {
+    objectKey: {
       type: String,
       required: true,
     },
