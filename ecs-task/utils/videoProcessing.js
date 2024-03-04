@@ -1,6 +1,10 @@
 const fs = require("fs");
+const path = require("path");
 const axios = require("axios");
 const { exec } = require("child_process");
+
+
+
 
 const runParallelFFmpegCommands = async (commands) => {
   console.log("Commands to run:", commands);
@@ -23,21 +27,49 @@ const runParallelFFmpegCommands = async (commands) => {
   results.forEach(({ stdout, stderr }, index) => {
     console.log(`Result for command ${index + 1}:`);
     // Comment out these lines if you don't want to log stdout and stderr
-    console.log(`STDOUT: ${stdout}`);
-    console.error(`STDERR: ${stderr}`);
+    // console.log("STDOUT content:", stdout);
+    // console.error("STDERR content:", stderr);
   });
   return results;
 };
 
-const checkIfFileExists = (fileList) => {
-  fileList.forEach((file) => {
-    if (!fs.existsSync(file)) {
+
+
+async function checkIfFileExists(allFiles, filePath) {
+  console.log("Checking if files exist:");
+  for (const file of allFiles) {
+    const newfilePath = path.resolve(filePath, file);
+    console.log(`Checking for file: ${newfilePath}`); // Added line to log the full path
+    if (!fs.existsSync(newfilePath)) {
       throw new Error(`${file} does not exist`);
     }
-  });
-};
+  }
+  console.log("Checking successful");
+}
 
-const downloadVideo = async (url, destination) => {
+// const downloadVideo = async (url, destination) => {
+//   try {
+//     const response = await axios({
+//       url,
+//       method: "GET",
+//       responseType: "stream",
+//     });
+
+//     const writer = fs.createWriteStream(destination);
+
+//     response.data.pipe(writer);
+
+//     return new Promise((resolve, reject) => {
+//       writer.on("finish", resolve);
+//       writer.on("error", reject);
+//     });
+//   } catch (error) {
+//     console.log("Error downloading video: " + error.message);
+//     process.exit(1);
+//   }
+// };
+
+const downloadVideo = async (url, destinationPath) => {
   try {
     const response = await axios({
       url,
@@ -45,7 +77,7 @@ const downloadVideo = async (url, destination) => {
       responseType: "stream",
     });
 
-    const writer = fs.createWriteStream(destination);
+    const writer = fs.createWriteStream(destinationPath);
 
     response.data.pipe(writer);
 
@@ -54,7 +86,7 @@ const downloadVideo = async (url, destination) => {
       writer.on("error", reject);
     });
   } catch (error) {
-    console.log("Error downloading video: " + error.message);
+    console.error("Error downloading video: " + error.message);
     process.exit(1);
   }
 };
@@ -69,9 +101,22 @@ function removeFileExtension(videoName) {
   return videoName;
 }
 
+function getFileSize(filePath){
+  
+try {
+  const stats = fs.statSync(filePath);
+  const fileSizeInBytes = stats.size;
+
+  console.log(`File size: ${fileSizeInBytes} bytes`);
+} catch (error) {
+  console.error(`Error getting file size: ${error.message}`);
+}
+}
+
 module.exports = {
   runParallelFFmpegCommands,
   checkIfFileExists,
   downloadVideo,
   removeFileExtension,
+  getFileSize
 };

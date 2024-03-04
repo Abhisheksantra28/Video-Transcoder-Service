@@ -1,17 +1,19 @@
 const axios = require("axios");
+const path = require("path");
 const { generateSignedGetUrl, uploadFileToS3 } = require("./utils/s3Helper");
 const {
   downloadVideo,
   removeFileExtension,
   runParallelFFmpegCommands,
   checkIfFileExists,
+  getFileSize,
 } = require("./utils/videoProcessing");
 
 const { VIDEO_PROCESS_STATES } = require("./utils/constants");
 
 require("dotenv").config();
 
-const markTaskCompleted = async ( key, allFilesObjects) => {
+const markTaskCompleted = async (key, allFilesObjects) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
@@ -30,7 +32,7 @@ const markTaskCompleted = async ( key, allFilesObjects) => {
   }
 };
 
-const markTaskFailed = async ( key) => {
+const markTaskFailed = async (key) => {
   try {
     const webhook = process.env.WEBHOOK_URL;
     console.log("Webhook URL:", webhook);
@@ -68,14 +70,13 @@ let videoFormat = [
     const bucketName = process.env.TEMP_S3_BUCKET_NAME;
     const finalBucketName = process.env.FINAL_S3_BUCKET_NAME;
 
-
     if (!videoToProcess) {
       console.error(
-        "Missing environment variable: VIDEO_NAME. Please set the environment variable with the video name you want to process."
+        "Missing environment variable: OBJECT_KEY Please set the environment variable with the video name you want to process."
       );
       process.exit(1);
     }
-   
+
     const url = await generateSignedGetUrl({ key, bucketName });
 
     if (!url) {
@@ -85,13 +86,22 @@ let videoFormat = [
       process.exit(1);
     }
 
-    const outputVideoName = removeFileExtension(videoToProcess);
+    console.log("getURL: ", url);
+    const videoName = key.split("/").pop();
+    const outputVideoName = key.split("/").pop().split(".")[0];
+    // const outputVideoName = removeFileExtension(videoToProcess);
 
-    await downloadVideo(url, videoToProcess);
+    console.log("testing....");
+    const desiredPath = path.join(__dirname, "downloads"); // Example path construction
+    await downloadVideo(url, desiredPath);
+    // await downloadVideo(url, videoToProcess);
 
     videoFormat.forEach((format) => {
       ffmpegCommands.push(
-        `ffmpeg -i ${videoToProcess} -y -acodec aac -vcodec libx264 -filter:v scale=${
+        `ffmpeg -i ${path.join(
+          desiredPath,
+          videoName
+        )} -y -acodec aac -vcodec libx264 -filter:v scale=${
           format.scale
         } -f mp4 ${outputVideoName + "-" + format.name}.mp4`
       );
@@ -101,12 +111,14 @@ let videoFormat = [
 
     await runParallelFFmpegCommands(ffmpegCommands);
 
-    checkIfFileExists(allFiles);
+    console.log(allFiles);
 
 
     let uploadPromises = [];
     allFiles.map((file) => {
-      uploadPromises.push(uploadFileToS3(file, finalBucketName));
+      uploadPromises.push(
+        uploadFileToS3(desiredPath, file, finalBucketName)
+      );
     });
 
     console.log("Uploading files to S3:");
@@ -145,7 +157,7 @@ let videoFormat = [
         }
       });
 
-      markTaskCompleted( key, allFilesObject);
+      markTaskCompleted(key, allFilesObject);
     } else {
       const failedResults = results.filter(
         (result) => result.status === "rejected"
