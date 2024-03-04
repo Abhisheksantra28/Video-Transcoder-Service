@@ -7,6 +7,7 @@ const {
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const axios = require("axios");
 const fs = require("fs");
+const path = require("path");
 
 require("dotenv").config();
 
@@ -43,24 +44,21 @@ const generateSignedGetUrl = async (payload) => {
   }
 };
 
-async function uploadFileToS3(fileName, bucketName, contentType) {
+async function uploadFileToS3(filePath, file, bucketName) {
   try {
-    const fileData = fs.readFileSync(fileName);
+    
+    const fileData = fs.readFileSync(filePath);
 
     // Construct the PutObject command with secure credentials and appropriate metadata
     const command = new PutObjectCommand({
       Bucket: bucketName,
-      Key: `processed/videos/${fileName}`,
-      ContentType: contentType,
+      Key: `videos/${file}`,
+      ContentType: "video/mp4",
     });
 
     const url = await getSignedUrl(s3Client, command);
     // Use Axios to upload the file to the pre-signed URL
-    const response = await axios.put(url, fileData, {
-      headers: {
-        "Content-Type": contentType,
-      },
-    });
+    const response = await axios.put(url, fileData);
     // Send the command to upload the file
     // const uploadResponse = await s3Client.send(command);
 
