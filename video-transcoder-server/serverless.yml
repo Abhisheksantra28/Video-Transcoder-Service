@@ -1,5 +1,5 @@
 service: video-transcoder-server
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 provider:
   name: aws
@@ -14,6 +14,8 @@ provider:
     TEMP_S3_BUCKET_NAME: ${env:TEMP_S3_BUCKET_NAME}
     FINAL_S3_BUCKET_NAME: ${env:FINAL_S3_BUCKET_NAME}
     WEBHOOK_URL: ${env:WEBHOOK_URL}
+    CLUSTER: ${env:CLUSTER}
+    TASK: ${env:TASK}
 
 plugins:
   - serverless-offline
@@ -24,4 +26,4 @@ functions:
   api:
     handler: ./src/index.handler
     events:
-      - httpApi: '*'
+      - httpApi: "*"
