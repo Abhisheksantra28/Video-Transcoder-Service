@@ -11,10 +11,12 @@ RUN apt-get install -y ffmpeg
 
 WORKDIR /app
 
-COPY index.js index.js
-COPY utils/ utils/
-COPY package*.json .
 
+COPY package*.json .
 RUN npm install
+
+COPY utils/ utils/
+COPY index.js index.js
+
 
 CMD ["node", "index.js"]
