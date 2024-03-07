@@ -113,11 +113,10 @@ let videoFormat = [
 
     console.log(allFiles);
 
-
     let uploadPromises = [];
     allFiles.map((file) => {
       uploadPromises.push(
-        uploadFileToS3(desiredPath, file, finalBucketName)
+        uploadFileToS3(desiredPath, outputVideoName, file, finalBucketName)
       );
     });
 
