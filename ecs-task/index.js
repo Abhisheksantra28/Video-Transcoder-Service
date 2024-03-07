@@ -3,10 +3,7 @@ const path = require("path");
 const { generateSignedGetUrl, uploadFileToS3 } = require("./utils/s3Helper");
 const {
   downloadVideo,
-  removeFileExtension,
   runParallelFFmpegCommands,
-  checkIfFileExists,
-  getFileSize,
 } = require("./utils/videoProcessing");
 
 const { VIDEO_PROCESS_STATES } = require("./utils/constants");

@@ -91,32 +91,9 @@ const downloadVideo = async (url, destinationPath) => {
   }
 };
 
-function removeFileExtension(videoName) {
-  const lastDotIndex = videoName.lastIndexOf(".");
-
-  if (lastDotIndex !== -1 && lastDotIndex > 0) {
-    return videoName.substring(0, lastDotIndex);
-  }
-
-  return videoName;
-}
-
-function getFileSize(filePath){
-  
-try {
-  const stats = fs.statSync(filePath);
-  const fileSizeInBytes = stats.size;
-
-  console.log(`File size: ${fileSizeInBytes} bytes`);
-} catch (error) {
-  console.error(`Error getting file size: ${error.message}`);
-}
-}
 
 module.exports = {
   runParallelFFmpegCommands,
   checkIfFileExists,
   downloadVideo,
-  removeFileExtension,
-  getFileSize
 };
