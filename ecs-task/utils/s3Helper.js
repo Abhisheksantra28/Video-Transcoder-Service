@@ -7,7 +7,7 @@ const {
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const axios = require("axios");
 const fs = require("fs");
-const path = require("path");
+
 
 require("dotenv").config();
 
@@ -44,7 +44,7 @@ const generateSignedGetUrl = async (payload) => {
   }
 };
 
-async function uploadFileToS3(filePath, file, bucketName) {
+async function uploadFileToS3(filePath,fileName, file, bucketName) {
   try {
     
     const fileData = fs.readFileSync(filePath);
@@ -52,7 +52,7 @@ async function uploadFileToS3(filePath, file, bucketName) {
     // Construct the PutObject command with secure credentials and appropriate metadata
     const command = new PutObjectCommand({
       Bucket: bucketName,
-      Key: `videos/${file}`,
+      Key: `videos/${fileName}/${file}`,
       ContentType: "video/mp4",
     });
 
