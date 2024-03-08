@@ -2,6 +2,7 @@ const {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
 } = require("@aws-sdk/client-s3");
 
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
@@ -18,24 +19,46 @@ const s3Client = new S3Client({
 });
 
 async function getObjectURL(key) {
-  const command = new GetObjectCommand({
-    Bucket: process.env.TEMP_S3_BUCKET_NAME,
-    Key: key,
-  });
+  try {
+    const command = new GetObjectCommand({
+      Bucket: process.env.TEMP_S3_BUCKET_NAME,
+      Key: key,
+    });
 
-  const url = await getSignedUrl(s3Client, command);
-  return url;
+    const url = await getSignedUrl(s3Client, command);
+    return url;
+  } catch (error) {
+    console.log("Error ocuur while generating the getObjectURL: ", error);
+  }
 }
 
 async function putObjectURL(fileName, contentType) {
-  const command = new PutObjectCommand({
-    Bucket: process.env.TEMP_S3_BUCKET_NAME,
-    Key: `uploads/videos/${fileName}`,
-    ContentType: contentType,
-  });
+  try {
+    const command = new PutObjectCommand({
+      Bucket: process.env.TEMP_S3_BUCKET_NAME,
+      Key: `uploads/videos/${fileName}`,
+      ContentType: contentType,
+    });
 
-  const url = await getSignedUrl(s3Client, command, { expiresIn: 180 });
-  return url;
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 180 });
+    return url;
+  } catch (error) {
+    console.log("Error ocuur while generating the putObjectURL: ", error);
+  }
 }
 
-module.exports = { getObjectURL, putObjectURL };
+async function deleteObjectFile(key) {
+  try {
+    const command = new DeleteObjectCommand({
+      Bucket: process.env.TEMP_S3_BUCKET_NAME,
+      Key: key,
+    });
+
+    await s3Client.send(command);
+    console.log("File successfully deleted from TEMP_S3_BUCKET");
+  } catch (error) {
+    console.log("Error ocuur while deleting the object file: ", error);
+  }
+}
+
+module.exports = { getObjectURL, putObjectURL, deleteObjectFile };

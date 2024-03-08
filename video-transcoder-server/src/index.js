@@ -1,14 +1,19 @@
 const serverless = require("serverless-http");
 const express = require("express");
-const  transcoderRoutes = require("./routes/transcoder.route.js");
+const transcoderRoutes = require("./routes/transcoder.route.js");
 const app = express();
 
 app.use(express.json());
 
-
 app.get("/", (req, res, next) => {
   return res.status(200).json({
     message: "Hello from root!",
+  });
+});
+
+app.get("/path", (req, res) => {
+  return res.status(200).json({
+    message: "hello from path!",
   });
 });
 
