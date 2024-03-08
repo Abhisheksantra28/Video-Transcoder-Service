@@ -15,13 +15,12 @@ const {
   setKey,
 } = require("../redis/redisHelper.js");
 
-const {
-  REDIS_KEYS,
-  VIDEO_PROCESS_STATES,
-} = require("../constants.js");
+const { REDIS_KEYS, VIDEO_PROCESS_STATES } = require("../constants.js");
 
 const { triggerTranscodingJob } = require("../utils/ecsTranscodingTrigger.js");
 const Video = require("../models/video.model.js");
+
+const { deleteObjectFile } = require("../utils/s3SignedUrl.js");
 
 const handleS3Trigger = asyncHander(async (req, res) => {
   console.log("Trigger from S3.....");
@@ -122,6 +121,7 @@ const handleECSTrigger = asyncHander(async (req, res) => {
     video.progress = VIDEO_PROCESS_STATES.COMPLETED;
     video.videoResolutions = videoResolutions;
     await video.save();
+    await deleteObjectFile(key);
   }
 
   if (progress === VIDEO_PROCESS_STATES.FAILED) {
