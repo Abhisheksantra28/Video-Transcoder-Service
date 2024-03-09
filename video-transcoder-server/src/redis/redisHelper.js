@@ -1,7 +1,6 @@
 const Redis = require("ioredis");
 const { REDIS_KEYS } = require("../constants.js");
 
-
 const redis = new Redis(process.env.REDIS_URL);
 
 const enqueueJobInQueue = async (job) => {
@@ -25,6 +24,7 @@ const deleteKey = async (key) => {
   return await redis.del(key);
 };
 
+/*
 const setKey = async (key, value, expire = 0, setIfNotExist = false) => {
   let params = [key, value];
   if (expire) {
@@ -41,6 +41,43 @@ const setKey = async (key, value, expire = 0, setIfNotExist = false) => {
     return true;
   } else return false;
 };
+*/
+async function setKey(key, value, options = {}) {
+  // Ensure a valid Redis client instance is available:
+  if (!redis) {
+    throw new Error(
+      "Redis client is not initialized. Please connect to Redis first."
+    );
+  }
+
+  try {
+    const defaultOptions = {
+      expire: 0,
+      setIfNotExist: false,
+    };
+    const mergedOptions = { ...defaultOptions, ...options };
+
+    const params = [key, value];
+    if (mergedOptions.expire > 0) {
+      params.push("EX", mergedOptions.expire);
+    }
+    if (mergedOptions.setIfNotExist) {
+      params.push("NX");
+    }
+
+    const response = await redis.send_command("SET", params);
+
+    if (response === "OK") {
+      console.log(`${key} set to ${value}`);
+      return true;
+    } else {
+      throw new Error("Failed to set key");
+    }
+  } catch (error) {
+    console.error(`Error setting key ${key}:`, error);
+    return false;
+  }
+}
 
 const increment = async (key) => {
   const value = await redis.incr(key);
@@ -58,14 +95,13 @@ const getQueueLength = async () => {
   return await redis.llen(REDIS_KEYS.VIDEO_TRANSCODING_QUEUE);
 };
 
-
 module.exports = {
-    enqueueJobInQueue,
-    deQueueJobFromQueue,
-    getKey,
-    deleteKey,
-    setKey,
-    increment,
-    decrement,
-    getQueueLength
-}
+  enqueueJobInQueue,
+  deQueueJobFromQueue,
+  getKey,
+  deleteKey,
+  setKey,
+  increment,
+  decrement,
+  getQueueLength,
+};
