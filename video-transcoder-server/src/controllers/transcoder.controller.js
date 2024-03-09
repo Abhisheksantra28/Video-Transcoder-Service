@@ -24,6 +24,8 @@ const { deleteObjectFile } = require("../utils/s3SignedUrl.js");
 
 const handleS3Trigger = asyncHander(async (req, res) => {
   console.log("Trigger from S3.....");
+
+  
   const { s3EventData } = req.body;
 
   if (!s3EventData) {
@@ -31,6 +33,9 @@ const handleS3Trigger = asyncHander(async (req, res) => {
   }
 
   console.log("S3 Event Data", s3EventData);
+
+  
+
   /*
    2024-03-02T11:52:19.234Z	be8e0a39-aeab-4624-bf95-26a6d373cfe6	INFO	Received S3 event with object details: {
      s3SchemaVersion: '1.0',
@@ -49,19 +54,22 @@ const handleS3Trigger = asyncHander(async (req, res) => {
    }
    */
 
-  const bucketName = s3EventData.bucket.name;
   const key = s3EventData.object.key;
+  // const key = "uploads/videos/VID-20230711-WA0065.mp4";
+  // await setKey(REDIS_KEYS.CURRENT_VIDEO_TRANSCODING_JOB_COUNT, 0)
 
   const currentJobCount = parseInt(
     await getKey(REDIS_KEYS.CURRENT_VIDEO_TRANSCODING_JOB_COUNT)
   );
+
+  console.log("current job count: ", currentJobCount);
 
   // key = 'uploads/videos/VID-20230711-WA0065.mp4';
   const fileName = key.split("/").pop().split(".")[0];
 
   await connectDB();
 
-  if (currentJobCount < 5) {
+  if (currentJobCount <= 5) {
     await increment(REDIS_KEYS.CURRENT_VIDEO_TRANSCODING_JOB_COUNT);
 
     const job = {
@@ -70,8 +78,9 @@ const handleS3Trigger = asyncHander(async (req, res) => {
       progress: VIDEO_PROCESS_STATES.PROCESSING,
     };
 
-    const transcodingData = await triggerTranscodingJob(job);
-    console.log("Triggered transcoding job", transcodingData);
+    await triggerTranscodingJob(job);
+
+    console.log("Triggered transcoding job");
 
     const video = await Video.create({
       fileName: fileName,
@@ -99,7 +108,7 @@ const handleS3Trigger = asyncHander(async (req, res) => {
     await enqueueJobInQueue(job);
 
     return res.status(200).json({
-      message: "Job enqueued successfully for" + fileName,
+      message: "Job enqueued successfully for " + fileName,
     });
   }
 });
