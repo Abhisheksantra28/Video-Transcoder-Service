@@ -1,97 +1,66 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import {
-  Code,
-  FileVideoIcon,
-  LayoutDashboard,
-  MessageSquare,
-  Music,
-  Settings,
-  UploadCloudIcon,
-  User,
-  VideoIcon,
-} from "lucide-react";
-import { Montserrat } from "next/font/google";
-import Image from "next/image";
+import { FileVideoIcon, Settings, UploadCloudIcon, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
-import { number } from "zod";
 
+interface NavItem {
+  title: string;
+  href: string;
+  icon: React.ComponentType<any>;
+}
 
-const monsterrat = Montserrat({
-  weight: "600",
-  subsets: ["latin"],
-});
-
-const routes = [
-
+const navItems: NavItem[] = [
   {
-    label: "Upload",
+    title: "Upload",
     icon: UploadCloudIcon,
     href: "/upload",
-    color: "text-blue-500",
   },
 
   {
-    label: "Assets",
+    title: "Assets",
     icon: FileVideoIcon,
     href: "/assets",
-    color: "text-violet-500",
   },
 
-
   {
-    label: "User",
+    title: "User",
     icon: User,
     href: "/user",
-    color: "text-sky-500",
   },
 
   {
-    label: "Settings",
+    title: "Settings",
     icon: Settings,
     href: "/settings",
   },
 ];
 
-
 const Sidebar = () => {
   const pathname = usePathname();
   return (
-    <div className="space-y-4 py-4 flex flex-col  h-full bg-[#111827] text-white">
-      <div className="px-3 py-2 flex-1 ">
-        <Link href="/" className="flex items-center pl-3 mb-14 ">
-          {/* <div className="relative w-8 h-8 mr-4">
-            <Image fill alt="logo" src="/logo.png" />
-          </div> */}
-          <h1 className={cn(`text-2xl ml-4 font-bold`, monsterrat.className)}>
-            Transcoder
-          </h1>
-        </Link>
-
-        <div className="space-y-1 flex flex-col">
-          {routes.map((item) => (
+    <div className="hidden md:flex flex-col w-[17rem] border-r bg-gray-100/40 dark:bg-gray-800/40">
+      <div className="flex-1 overflow-auto">
+        <nav className="flex-1 py-4">
+          {navItems.map((item: NavItem) => (
             <Link
+              key={item.title} // Add a unique key for each link
+              className={`flex items-center h-10 px-4 mx-4 text-md font-medium text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50 rounded-lg cursor-pointer  ${
+                pathname == item.href
+                  ? "text-zinc-800 bg-black/10"
+                  : "text-gray-500 hover:text-gray-950"
+              }`}
               href={item.href}
-              key={item.href}
-              className={cn(
-                `text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-white hover:bg-white/10 rounded-lg transition`,
-                pathname === item.href
-                  ? "text-white bg-white/10"
-                  : "text-zinc-400"
-              )}
             >
-              <div className="flex items-center flex-1">
-                <item.icon className={cn("h-5 w-5 mr-3", item.color)} />
-                {item.label}
+              <div className="flex flex-1 items-center">
+                {item.icon && <item.icon className="h-5 w-5 mr-3" />}
+                {item.title}
               </div>
             </Link>
           ))}
-        </div>
+        </nav>
       </div>
-
     </div>
   );
 };
