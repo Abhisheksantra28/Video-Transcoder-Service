@@ -1,9 +1,5 @@
-const { asyncHander } = require("../utils/asyncHandler.js");
-const axios = require("axios");
-
+const { asyncHandler } = require("../utils/asyncHandler.js");
 require("dotenv").config();
-
-const { connectDB } = require("../db/database.js");
 
 const {
   getKey,
@@ -22,10 +18,9 @@ const Video = require("../models/video.model.js");
 
 const { deleteObjectFile } = require("../utils/s3SignedUrl.js");
 
-const handleS3Trigger = asyncHander(async (req, res) => {
+const handleS3Trigger = asyncHandler(async (req, res) => {
   console.log("Trigger from S3.....");
 
-  
   const { s3EventData } = req.body;
 
   if (!s3EventData) {
@@ -33,8 +28,6 @@ const handleS3Trigger = asyncHander(async (req, res) => {
   }
 
   console.log("S3 Event Data", s3EventData);
-
-  
 
   /*
    2024-03-02T11:52:19.234Z	be8e0a39-aeab-4624-bf95-26a6d373cfe6	INFO	Received S3 event with object details: {
@@ -67,7 +60,7 @@ const handleS3Trigger = asyncHander(async (req, res) => {
   // key = 'uploads/videos/VID-20230711-WA0065.mp4';
   const fileName = key.split("/").pop().split(".")[0];
 
-  await connectDB();
+  // await connectDB();
 
   if (currentJobCount <= 5) {
     await increment(REDIS_KEYS.CURRENT_VIDEO_TRANSCODING_JOB_COUNT);
@@ -85,6 +78,7 @@ const handleS3Trigger = asyncHander(async (req, res) => {
     const video = await Video.create({
       fileName: fileName,
       objectKey: key,
+      owner:req.user._id,
       progress: VIDEO_PROCESS_STATES.PROCESSING,
     });
 
@@ -113,12 +107,12 @@ const handleS3Trigger = asyncHander(async (req, res) => {
   }
 });
 
-const handleECSTrigger = asyncHander(async (req, res) => {
+const handleECSTrigger = asyncHandler(async (req, res) => {
   console.log("Trigger from ECS.....");
   //webhook
   const { key, progress, videoResolutions } = req.body;
 
-  await connectDB();
+  // await connectDB();
 
   const video = await Video.findOne({ objectKey: key });
 
