@@ -62,6 +62,19 @@ const handleS3Trigger = asyncHandler(async (req, res) => {
 
   // await connectDB();
 
+  const video = await Video.create({
+    fileName: fileName,
+    objectKey: key,
+    // owner: req.user._id,
+    progress: VIDEO_PROCESS_STATES.PENDING,
+  });
+
+  if (!video) {
+    return res.status(500).json({
+      message: "Failed to create video. Please try again later.",
+    });
+  }
+
   if (currentJobCount <= 5) {
     await increment(REDIS_KEYS.CURRENT_VIDEO_TRANSCODING_JOB_COUNT);
 
@@ -75,6 +88,7 @@ const handleS3Trigger = asyncHandler(async (req, res) => {
 
     console.log("Triggered transcoding job");
 
+    /*
     const video = await Video.create({
       fileName: fileName,
       objectKey: key,
@@ -87,6 +101,14 @@ const handleS3Trigger = asyncHandler(async (req, res) => {
         message: "Failed to create video. Please try again later.",
       });
     }
+    */
+
+    await Video.findOneAndUpdate(
+      { objectKey: job.objectKey },
+      {
+        $set: { progress: job.progress },
+      }
+    );
 
     return res.status(200).json({
       message: "Video transcoding job triggered for " + fileName,
@@ -96,7 +118,7 @@ const handleS3Trigger = asyncHandler(async (req, res) => {
     const job = {
       fileName,
       objectKey: key,
-      progress: VIDEO_PROCESS_STATES.PENDING,
+      progress: VIDEO_PROCESS_STATES.QUEUED,
     };
 
     await enqueueJobInQueue(job);
@@ -156,7 +178,9 @@ const handleECSTrigger = asyncHandler(async (req, res) => {
 
   if (availableSlots > 0) {
     for (const i = 0; i < availableSlots; i++) {
-      const job = await deQueueJobFromQueue();
+      let job = await deQueueJobFromQueue();
+      job.progress = VIDEO_PROCESS_STATES.PROCESSING;
+
       await increment(REDIS_KEYS.CURRENT_VIDEO_TRANSCODING_JOB_COUNT);
       await triggerTranscodingJob(job);
 
