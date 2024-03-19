@@ -4,12 +4,12 @@ const transcoderRoutes = require("./routes/transcoder.route.js");
 const userRoutes = require("./routes/user.route.js");
 const cookieParser = require("cookie-parser");
 const { connectDB } = require("./db/database.js");
+const cors = require("cors");
+const { connectPassport } = require("./utils/Provider.js");
+const session = require("express-session");
+const passport = require("passport");
+
 const app = express();
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
 
 connectDB()
   .then(() => {
@@ -23,6 +23,42 @@ connectDB()
   });
 
 
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+
+    cookie: {
+      secure: true,
+      httpOnly: true,
+      sameSite: "none",
+    },
+  })
+);
+app.use(cookieParser());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+
+
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CORS_ORIGIN,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
+
+app.use(passport.authenticate("session"));
+app.use(passport.initialize());
+app.use(passport.session());
+app.enable("trust proxy");
+
+connectPassport();
+
+
 
 app.get("/", (req, res, next) => {
   return res.status(200).json({
@@ -30,19 +66,7 @@ app.get("/", (req, res, next) => {
   });
 });
 
-app.get("/path", (req, res) => {
-  return res.status(200).json({
-    message: "hello from path!",
-  });
-});
-
 app.use("/api/v1/video", transcoderRoutes);
 app.use("/api/v1/user", userRoutes);
-
-app.use((req, res, next) => {
-  return res.status(404).json({
-    error: "Not Found",
-  });
-});
 
 module.exports.handler = serverless(app);
