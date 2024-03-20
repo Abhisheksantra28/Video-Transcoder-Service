@@ -45,8 +45,8 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    credentials: true,
     origin: process.env.CORS_ORIGIN,
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
 );
@@ -57,7 +57,6 @@ app.use(passport.session());
 app.enable("trust proxy");
 
 connectPassport();
-
 
 
 app.get("/", (req, res, next) => {
