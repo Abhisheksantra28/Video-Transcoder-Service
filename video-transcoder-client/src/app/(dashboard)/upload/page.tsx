@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { CameraIcon } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 

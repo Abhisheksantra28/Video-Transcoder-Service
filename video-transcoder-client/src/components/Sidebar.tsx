@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
 const Sidebar = () => {
   const pathname = usePathname();
   return (
-    <div className="hidden md:flex flex-col w-[17rem] border-r bg-gray-100/40 dark:bg-gray-800/40">
+    <div className="hidden md:flex flex-col w-64 border-r bg-gray-100/40 dark:bg-gray-800/40">
       <div className="flex-1 overflow-auto">
         <nav className="flex-1 py-4">
           {navItems.map((item: NavItem) => (
