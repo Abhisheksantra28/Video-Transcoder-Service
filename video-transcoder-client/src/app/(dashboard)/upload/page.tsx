@@ -1,13 +1,34 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
+import {
+  userExist,
+  userNotExist,
+} from "@/redux/reducer/userReducer";
+import axios from "axios";
 import { CameraIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 const Page = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Adjusted type to File
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    axios
+      .get(
+        `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/user/current-user`,
+        {
+          withCredentials: true,
+        }
+      )
+      .then((res) => dispatch(userExist(res.data.data)))
+      .catch((err) => dispatch(userNotExist()));
+  }, [dispatch]);
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -47,7 +68,7 @@ const Page = () => {
       return;
     }
 
-    setLoading(true); // Set loading state for UI feedback
+    setLoading(true);
 
     try {
       const { name, type } = selectedFile;
@@ -83,7 +104,7 @@ const Page = () => {
     } catch (error) {
       console.error("Error occurred during upload:", error);
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false); 
     }
   };
 

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-
+import { store } from "../redux/store";
+import ReactReduxProvider from "./ReactReduxProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,11 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className} suppressHydrationWarning={true}>
-        {children}
-        <Toaster />
-      </body>
-    </html>
+    <ReactReduxProvider>
+      <html lang="en">
+        <body className={inter.className} suppressHydrationWarning={true}>
+          {children}
+          <Toaster />
+        </body>
+      </html>
+    </ReactReduxProvider>
   );
 }

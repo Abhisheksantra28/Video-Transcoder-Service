@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import {
   Card,
@@ -9,12 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
-// import useAuthStore from "@/zustand/authStore";
+import { userExist} from "@/redux/reducer/userReducer";
+import { useDispatch } from "react-redux";
 
 const SignUpPage = () => {
   const router = useRouter();
-  // const authStore = useAuthStore();
+  const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -27,10 +26,7 @@ const SignUpPage = () => {
         "_self"
       );
 
-    
-      toast({ title: "login successful!" });
-
-      // router.push("/upload");
+      dispatch(userExist(true));
     } catch (error: any) {
       console.error("Login failed", error);
       setError("Login failed. Please try again later.");
