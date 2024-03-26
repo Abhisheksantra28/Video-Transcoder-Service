@@ -5,15 +5,14 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "./ui/use-toast";
-import { useDispatch} from "react-redux";
-import { userNotExist } from "@/redux/reducer/userReducer";
+import { useDispatch } from "react-redux";
+import { UserType, userNotExist } from "@/redux/reducer/userReducer";
 
 interface HeaderProps {
-  isLoggedIn: boolean;
-  loader: boolean;
+  user: UserType | null;
 }
 
-const Header = ({ isLoggedIn, loader }: HeaderProps) => {
+const Header = ({ user }: HeaderProps) => {
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -25,6 +24,7 @@ const Header = ({ isLoggedIn, loader }: HeaderProps) => {
       );
       dispatch(userNotExist());
       toast({ title: data.message });
+      router.push("/");
     } catch (error) {
       // Handle error
       console.error("Error occurred during sign out:", error);
@@ -40,27 +40,18 @@ const Header = ({ isLoggedIn, loader }: HeaderProps) => {
         </Link>
 
         <div className="flex gap-4">
-     
-          {isLoggedIn ? (
-            <Button
-              className="text-lg hover:bg-gray-800 hover:text-white transition-all duration-300"
-              variant="secondary"
-              onClick={handleSignOut}
-            >
-              Sign out
-            </Button>
-          ) : (
-            <Button
-              className="text-lg hover:bg-gray-800 hover:text-white transition-all duration-300"
-              variant="secondary"
-              onClick={() => router.push("/signin")}
-            >
-              Sign In
-            </Button>
-          )}
+          <Button
+            className="text-lg hover:bg-gray-800 hover:text-white transition-all duration-300"
+            variant="secondary"
+            onClick={handleSignOut}
+          >
+            Sign out
+          </Button>
 
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" />
+            <AvatarImage
+              src={user ? `${user.avatar}` : "https://github.com/shadcn.png"}
+            />
             <AvatarFallback>U</AvatarFallback>
           </Avatar>
         </div>
