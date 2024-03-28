@@ -62,12 +62,14 @@ const handleS3Trigger = asyncHandler(async (req, res) => {
 
   // await connectDB();
 
+  
+
   const video = await Video.create({
     fileName: fileName,
     objectKey: key,
-    // owner: req.user._id,
     progress: VIDEO_PROCESS_STATES.PENDING,
   });
+
 
   if (!video) {
     return res.status(500).json({

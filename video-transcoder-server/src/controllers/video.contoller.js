@@ -84,7 +84,7 @@ const getVideoByFileName = asyncHandler(async (req, res) => {
     throw new ApiError(400, "video fileName is required!");
   }
 
-  const video = await Video.findOne({fileName});
+  const video = await Video.findOne({ fileName });
 
   if (!video) {
     throw new ApiError(404, "Video not found!");
@@ -95,4 +95,21 @@ const getVideoByFileName = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, video, "video fetched successfully"));
 });
 
-module.exports = { getAllVideos, getVideoByFileName };
+const getVideoStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!videoId) {
+    throw new ApiError(400, "videoId is required!");
+  }
+
+  const video = await Video.findById(videoId).select("progress");
+
+  if (!video) {
+    throw new ApiError(404, "Video not found!");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "video status fetched successfully!"));
+});
+
+module.exports = { getAllVideos, getVideoByFileName, getVideoStatus };

@@ -22,6 +22,7 @@ const videoSchema = new mongoose.Schema(
     },
     type: {
       type: String,
+      default:"mp4"
     },
 
     owner: {
