@@ -16,11 +16,8 @@ const Page = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
-
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Adjusted type to File
   const [loading, setLoading] = useState(false);
-
-
 
   const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -87,7 +84,7 @@ const Page = () => {
       if (upload.ok) {
         console.log("Uploaded successfully!");
         setSelectedFile(null); // Clear selectedFile state
-        router.push("/assets");
+        router.push(`/assets?fileName=${selectedFile.name.split(".")[0]}`);
       } else {
         throw new Error(
           `Upload to pre-signed URL failed with status: ${upload.status}`
