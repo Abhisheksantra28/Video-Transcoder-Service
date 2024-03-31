@@ -22,7 +22,10 @@ const Page = () => {
   const [videoData, setVideoData] = useState<any>();
   const [videoStatus, setVideoStatus] = useState<any>();
   const [pollingCompleted, setPollingCompleted] = useState<boolean>(false);
-  const [downloading, setDownloading] = useState(false); 
+  const [downloading, setDownloading] = useState(false);
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+
+  // VID-20230429-WA0030-360p.mp4
 
   useEffect(() => {
     const fetchVideo = () => {
@@ -30,6 +33,9 @@ const Page = () => {
         .get(
           `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/${fileName}`
         )
+        // .get(
+        //   `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/VID-20230429-WA0030`
+        // )
         .then((response) => {
           console.log(response.data.data);
           setVideoData(response.data.data);
@@ -49,7 +55,7 @@ const Page = () => {
             `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/s/${videoData._id}`
           )
           .then((response) => {
-            console.log(response.data.data);
+            // console.log(response.data.data);
             setVideoStatus(response.data.data);
 
             // If the status is successful, stop polling
@@ -74,34 +80,31 @@ const Page = () => {
       // Clear the interval when component unmounts to avoid memory leaks
       return () => clearInterval(pollingInterval);
     }
-  }, [fileName, pollingCompleted, videoData]);
-
+  }, [pollingCompleted, videoData]);
 
   const handleDownload = async () => {
     if (videoStatus.progress !== "completed" || downloading) return;
-  
-    setDownloading(true); // Set downloading state to true
-  
-    try {
 
+    setDownloading(true); // Set downloading state to true
+
+    try {
       const zip = new JSZip();
-  
+
       for (const resolution in videoData.videoResolutions) {
         const videoUrl = videoData.videoResolutions[resolution];
 
         const res = await fetch(
           `/api/videos?fileName=${fileName}&videoUrl=${videoUrl}`
         );
-  
+
         if (!res.ok) {
           throw new Error(`video fetching failed with status: ${res.status}`);
         }
-  
-        const { url } = await res.json(); 
 
-        console.log(url)
-    
-  
+        const { url } = await res.json();
+
+        console.log(url);
+
         try {
           const response = await axios.get(url, {
             responseType: "blob",
@@ -109,11 +112,14 @@ const Page = () => {
           const blob = new Blob([response.data]);
           zip.file(`${videoData.fileName}-${resolution}.mp4`, blob);
         } catch (error) {
-          console.error(`Error downloading video for resolution: ${resolution}`, error);
+          console.error(
+            `Error downloading video for resolution: ${resolution}`,
+            error
+          );
           // Handle specific errors here (e.g., display user-friendly message)
         }
       }
-  
+
       const zipBlob = await zip.generateAsync({ type: "blob" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(zipBlob);
@@ -121,13 +127,34 @@ const Page = () => {
       link.click();
     } catch (error) {
       console.error("Error downloading video resolutions:", error);
-      // Handle general download errors (e.g., display user-friendly message)
     } finally {
-      setDownloading(false); // Reset downloading state
+      setDownloading(false);
     }
   };
 
+  const fetchPreviewUrls = async () => {
+    try {
+      const urls: Record<string, string> = {};
+      for (const resolution in videoData.videoResolutions) {
+        const videoUrl = videoData.videoResolutions[resolution];
+        const res = await fetch(
+          `/api/videos?fileName=${fileName}&videoUrl=${videoUrl}`
+        );
 
+        if (!res.ok) {
+          throw new Error(`Video fetching failed with status: ${res.status}`);
+        }
+
+        const { url } = await res.json();
+        urls[resolution] = url;
+      }
+      setPreviewUrls(urls);
+    } catch (error) {
+      console.error("Error fetching preview URLs:", error);
+    }
+  };
+
+ 
   return (
     <main className="flex-grow p-6">
       <div className="flex justify-between items-center mb-4">
@@ -142,6 +169,7 @@ const Page = () => {
           <span>Download</span>
         </Button>
       </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -170,12 +198,13 @@ const Page = () => {
                 )}
               </TableCell>
               <TableCell>{videoData.createdAt}</TableCell>
-              <TableCell>Preview</TableCell>
+              <TableCell>
+                <Button >Preview</Button>
+              </TableCell>
             </TableRow>
           </TableBody>
         )}
       </Table>
-   
     </main>
   );
 };
