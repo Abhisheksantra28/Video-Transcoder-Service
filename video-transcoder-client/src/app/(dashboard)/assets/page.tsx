@@ -13,7 +13,9 @@ import { DownloadIcon } from "lucide-react";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
 import JSZip from "jszip";
-
+import { Player } from "react-tuby";
+import "react-tuby/css/main.css";
+import Modal from "react-modal";
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -24,6 +26,8 @@ const Page = () => {
   const [pollingCompleted, setPollingCompleted] = useState<boolean>(false);
   const [downloading, setDownloading] = useState(false);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [modalIsOpen, setIsOpen] = useState<boolean>(false);
 
   // VID-20230429-WA0030-360p.mp4
 
@@ -154,7 +158,13 @@ const Page = () => {
     }
   };
 
- 
+  const handlePreview = () => {
+    fetchPreviewUrls().then(() => {
+      setIsPlaying(true);
+      setIsOpen(true);
+    });
+  };
+
   return (
     <main className="flex-grow p-6">
       <div className="flex justify-between items-center mb-4">
@@ -199,12 +209,40 @@ const Page = () => {
               </TableCell>
               <TableCell>{videoData.createdAt}</TableCell>
               <TableCell>
-                <Button >Preview</Button>
+                <Button onClick={handlePreview}>Preview</Button>
               </TableCell>
             </TableRow>
           </TableBody>
         )}
       </Table>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={() => setIsOpen(false)}
+        style={{
+          overlay: {
+            backgroundColor: "rgba(0,0,0,0.2)",
+          },
+          content: {
+            width: "36vw",
+            height: "56vh",
+            margin: "auto", // Center the modal horizontally
+            padding: "0px",
+            border: "none",
+            overflow: "hidden",
+          },
+        }}
+      >
+        {isPlaying && (
+          <Player
+            src={Object.entries(previewUrls).map(([quality, url]) => ({
+              quality,
+              url,
+            }))}
+            dimensions={{ width: "100%", height: "100%" }}
+          />
+        )}
+      </Modal>
     </main>
   );
 };
