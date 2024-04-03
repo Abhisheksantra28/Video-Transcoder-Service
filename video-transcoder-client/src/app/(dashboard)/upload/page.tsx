@@ -1,20 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  RootState,
-  userExist,
-  userNotExist,
-} from "@/redux/reducer/userReducer";
-import axios from "axios";
 import { CameraIcon } from "lucide-react";
-import { redirect, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 
 const Page = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Adjusted type to File
   const [loading, setLoading] = useState(false);
@@ -71,7 +64,6 @@ const Page = () => {
       }
 
       const { url } = await res.json(); // Get pre-signed URL from server
-      console.log(url);
 
       const upload = await fetch(url, {
         method: "PUT",
@@ -140,7 +132,7 @@ const Page = () => {
         <div className="mt-10 text-center">
           <Button
             type="submit"
-            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            className="bg-blue-500 text-white text-lg px-6 py-2  rounded hover:bg-blue-600"
           >
             {loading ? "Uploading..." : "Submit"}
           </Button>
