@@ -16,6 +16,7 @@ import JSZip from "jszip";
 import { Player } from "react-tuby";
 import "react-tuby/css/main.css";
 import Modal from "react-modal";
+// import { debounce, throttle } from "lodash"; 
 
 const Page = () => {
   const searchParams = useSearchParams();
@@ -41,7 +42,6 @@ const Page = () => {
         //   `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/VID-20230429-WA0030`
         // )
         .then((response) => {
-          console.log(response.data.data);
           setVideoData(response.data.data);
         })
         .catch((error) => {
@@ -49,7 +49,28 @@ const Page = () => {
         });
     };
     fetchVideo();
+
   }, [fileName]);
+
+
+    // // Apply debounce to fetchVideo function
+    // const debouncedFetchVideo = debounce(() => {
+    //   axios
+    //     .get(
+    //       `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/${fileName}`
+    //     )
+    //     .then((response) => {
+    //       setVideoData(response.data.data);
+    //       console.log(videoData)
+    //     })
+    //     .catch((error) => {
+    //       console.log("Error occurred while fetching the video file", error);
+    //     });
+    // }, 500); // Adjust the debounce delay as needed
+  
+    // useEffect(() => {
+    //   debouncedFetchVideo(); // Invoke the debouncedFetchVideo function
+    // }, [fileName]);
 
   useEffect(() => {
     if (videoData) {
