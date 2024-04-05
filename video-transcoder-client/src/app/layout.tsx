@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { store } from "../redux/store";
 import ReactReduxProvider from "./ReactReduxProvider";
+import { CrispProvider } from "@/components/CrispProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,6 +20,7 @@ export default function RootLayout({
   return (
     <ReactReduxProvider>
       <html lang="en">
+        <CrispProvider/>
         <body className={inter.className} suppressHydrationWarning={true}>
           {children}
           <Toaster />
