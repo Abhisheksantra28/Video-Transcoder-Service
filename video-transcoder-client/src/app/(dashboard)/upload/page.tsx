@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CameraIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+
 
 const Page = () => {
   const router = useRouter();
