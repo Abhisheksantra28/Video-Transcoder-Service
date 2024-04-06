@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { RootState } from "@/redux/reducer/userReducer";
 import { useSelector } from "react-redux";
 
-const page = () => {
+const Page = () => {
   const { user } = useSelector((state: RootState) => state.userReducer);
   return (
     <div className="min-h-screen w-4/5">
@@ -79,4 +79,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
