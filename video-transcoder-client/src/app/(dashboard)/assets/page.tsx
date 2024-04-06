@@ -50,29 +50,9 @@ const Page = () => {
         });
     };
     
-    {fileName && fetchVideo()}
+    if(fileName) fetchVideo();
 
   }, [fileName]);
-
-
-    // // Apply debounce to fetchVideo function
-    // const debouncedFetchVideo = debounce(() => {
-    //   axios
-    //     .get(
-    //       `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/${fileName}`
-    //     )
-    //     .then((response) => {
-    //       setVideoData(response.data.data);
-    //       console.log(videoData)
-    //     })
-    //     .catch((error) => {
-    //       console.log("Error occurred while fetching the video file", error);
-    //     });
-    // }, 500); // Adjust the debounce delay as needed
-  
-    // useEffect(() => {
-    //   debouncedFetchVideo(); // Invoke the debouncedFetchVideo function
-    // }, [fileName]);
 
   useEffect(() => {
     if (videoData) {
@@ -107,7 +87,7 @@ const Page = () => {
       // Clear the interval when component unmounts to avoid memory leaks
       return () => clearInterval(pollingInterval);
     }
-  }, [pollingCompleted, videoData]);
+  }, [pollingCompleted, videoData,fileName]);
 
   const handleDownload = async () => {
     if (videoStatus.progress !== "completed" || downloading) return;
