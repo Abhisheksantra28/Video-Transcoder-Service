@@ -33,6 +33,7 @@ const Page = () => {
   // VID-20230429-WA0030-360p.mp4
 
   useEffect(() => {
+    
     const fetchVideo = () => {
       axios
         .get(
@@ -48,7 +49,8 @@ const Page = () => {
           console.log("Error occurred while fetching the video file", error);
         });
     };
-    fetchVideo();
+    
+    {fileName && fetchVideo()}
 
   }, [fileName]);
 
