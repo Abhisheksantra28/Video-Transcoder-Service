@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   RootState,
@@ -12,7 +13,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   useEffect(() => {
@@ -26,6 +27,8 @@ const page = () => {
       .then((res) => dispatch(userExist(res.data.data)))
       .catch((err) => dispatch(userNotExist()));
   }, [dispatch]);
+
+
   const { isAuthenticated } = useSelector(
     (state: RootState) => state.userReducer
   );
@@ -70,4 +73,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
