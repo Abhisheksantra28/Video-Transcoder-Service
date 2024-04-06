@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import {
   TableHead,
   TableRow,
@@ -18,8 +18,16 @@ import "react-tuby/css/main.css";
 import Modal from "react-modal";
 // import { debounce, throttle } from "lodash"; 
 
-const Page = () => {
+
+const useSuspenseSearchParams = () => {
   const searchParams = useSearchParams();
+
+  return searchParams;
+};
+
+
+const Page = () => {
+  const searchParams = useSuspenseSearchParams();
   const fileName: string | null = searchParams.get("fileName");
 
   const [videoData, setVideoData] = useState<any>();
@@ -250,4 +258,12 @@ const Page = () => {
   );
 };
 
-export default Page;
+
+const SuspensePage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <Page />
+  </Suspense>
+);
+
+
+export default SuspensePage;
