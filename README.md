@@ -2,6 +2,16 @@
 
 This project is a scalable video transcoding system built on AWS services and Node.js, aimed at automatically generating multiple resolutions of uploaded videos. It enhances accessibility and optimizes viewing experiences by providing users with options to preview and download videos in various resolutions.
 
+
+- Watch our demo video to see the system in action:
+
+
+https://github.com/Abhisheksantra28/Video-Transcoder-Service/assets/108479463/24dbc9ac-709c-46a6-8eae-3713b41fd0e1
+
+
+
+
+
 ## Technologies Used
 
 - **AWS Services**: S3, Lambda, EventBridge, ECS
