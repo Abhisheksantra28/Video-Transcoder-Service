@@ -148,7 +148,7 @@ const handleECSTrigger = asyncHandler(async (req, res) => {
     video.progress = VIDEO_PROCESS_STATES.COMPLETED;
     video.videoResolutions = videoResolutions;
     await video.save();
-    await deleteObjectFile(key);
+    await deleteObjectFile(key); // deleted the file from temp s3 bucket
   }
 
   if (progress === VIDEO_PROCESS_STATES.FAILED) {
