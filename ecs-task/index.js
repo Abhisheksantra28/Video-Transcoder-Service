@@ -85,7 +85,7 @@ let videoFormat = [
 
     console.log("getURL: ", url);
     const videoName = key.split("/").pop();
-    const outputVideoName = key.split("/").pop().split(".")[0];
+    const outputVideoName = videoName.split(".")[0]; // Remove file extension
     // const outputVideoName = removeFileExtension(videoToProcess);
 
     console.log("testing....");
