@@ -7,12 +7,12 @@ const cors = require("cors");
 const { connectPassport } = require("./src/utils/Provider.js");
 const session = require("express-session");
 const passport = require("passport");
-const dotenv = require("dotenv")
+const dotenv = require("dotenv");
+require("./src/jobs/queueProcessor.js"); // Start the polling for transcoding jobs queued in Redis
 
 const app = express();
 
 dotenv.config();
-
 
 connectDB()
   .then(() => {
@@ -45,7 +45,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   })
