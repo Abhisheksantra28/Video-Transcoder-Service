@@ -68,7 +68,7 @@ const Page = () => {
       // const { url } = await res.json(); // Get pre-signed URL from server
 
       const { data } = await axios.get(
-        `${SERVER}/upload?fileName=${name}&contentType=${type}`
+        `${SERVER}/video/upload?fileName=${name}&contentType=${type}`
       );
 
       const { url } = data;

@@ -114,7 +114,7 @@ const Page = () => {
         // console.log(url);
 
         const { data } = await axios.get(
-          `${SERVER}/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
+          `${SERVER}/video/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
         );
 
         const { url } = data;
@@ -161,7 +161,7 @@ const Page = () => {
 
         // const { url } = await res.json();
         const { data } = await axios.get(
-          `${SERVER}/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
+          `${SERVER}/video/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
         );
 
         const { url } = data;
