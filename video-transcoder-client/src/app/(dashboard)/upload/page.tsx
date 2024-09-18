@@ -7,7 +7,6 @@ import { CameraIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-
 const Page = () => {
   const router = useRouter();
 
@@ -71,9 +70,7 @@ const Page = () => {
         `${SERVER}/video/get-upload-url?fileName=${name}&contentType=${type}`
       );
 
-      console.log(data);
-
-      const { url } = data;
+      const url = data.data;
 
       const upload = await fetch(url, {
         method: "PUT",

@@ -114,10 +114,10 @@ const Page = () => {
         // console.log(url);
 
         const { data } = await axios.get(
-          `${SERVER}/video/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
+          `${SERVER}/video/get-video-urls?fileName=${fileName}&videoUrl=${videoUrl}`
         );
 
-        const { url } = data;
+        const url = data.data;
 
         try {
           const response = await axios.get(url, {
@@ -161,10 +161,10 @@ const Page = () => {
 
         // const { url } = await res.json();
         const { data } = await axios.get(
-          `${SERVER}/video/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
+          `${SERVER}/video/get-video-urls?fileName=${fileName}&videoUrl=${videoUrl}`
         );
 
-        const { url } = data;
+        const url = data.data;
         urls[resolution] = url;
       }
       setPreviewUrls(urls);
