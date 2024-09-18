@@ -18,10 +18,10 @@ const s3Client = new S3Client({
   },
 });
 
-async function getObjectURL(key) {
+async function getObjectURL(key, bucketName) {
   try {
     const command = new GetObjectCommand({
-      Bucket: process.env.TEMP_S3_BUCKET_NAME,
+      Bucket: bucketName,
       Key: key,
     });
 
