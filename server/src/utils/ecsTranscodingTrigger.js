@@ -35,7 +35,7 @@ const triggerTranscodingJob = async (job) => {
         containerOverrides: [
           //env variable
           {
-            name: "video-transcoder-image",
+            name: "video-transcoder",
             environment: [
               { name: "OBJECT_KEY", value: job.objectKey },
               {
