@@ -4,7 +4,10 @@ const { putObjectURL, getObjectURL } = require("../utils/s3SignedUrl.js");
 const uploadToTempBucketURL = async (req, res) => {
   const { fileName, contentType } = req.query;
 
+  console.log("fileName", fileName);
+
   const bucketName = process.env.TEMP_S3_BUCKET_NAME;
+  console.log("bucketName", bucketName);
 
   const url = await putObjectURL(fileName, contentType, bucketName);
 
