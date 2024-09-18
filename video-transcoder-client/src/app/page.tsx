@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { SERVER } from "@/constants";
 import {
   RootState,
   userExist,
@@ -21,7 +22,7 @@ const Page = () => {
   useEffect(() => {
     axios
       .get(
-        `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/user/current-user`,
+        `${SERVER}/user/current-user`,
         {
           withCredentials: true,
         }

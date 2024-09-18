@@ -1,6 +1,7 @@
 "use client";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
+import { SERVER } from "@/constants";
 import {
   RootState,
   userExist,
@@ -16,7 +17,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     axios
       .get(
-        `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/user/current-user`,
+        `${SERVER}/user/current-user`,
         {
           withCredentials: true,
         }

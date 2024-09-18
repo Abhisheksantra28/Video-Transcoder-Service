@@ -7,6 +7,7 @@ import axios from "axios";
 import { toast } from "./ui/use-toast";
 import { useDispatch } from "react-redux";
 import { UserType, userNotExist } from "@/redux/reducer/userReducer";
+import { SERVER } from "@/constants";
 
 interface HeaderProps {
   user: UserType | null;
@@ -19,7 +20,7 @@ const Header = ({ user }: HeaderProps) => {
   const handleSignOut = async () => {
     try {
       const { data } = await axios.get(
-        "https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/user/logout",
+        `${SERVER}/user/logout`,
         { withCredentials: true }
       );
       dispatch(userNotExist());

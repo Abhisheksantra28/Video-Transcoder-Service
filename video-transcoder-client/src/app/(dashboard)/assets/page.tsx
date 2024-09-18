@@ -16,15 +16,14 @@ import JSZip from "jszip";
 import { Player } from "react-tuby";
 import "react-tuby/css/main.css";
 import Modal from "react-modal";
-// import { debounce, throttle } from "lodash"; 
-
+import { SERVER } from "@/constants";
+// import { debounce, throttle } from "lodash";
 
 const useSuspenseSearchParams = () => {
   const searchParams = useSearchParams();
 
   return searchParams;
 };
-
 
 const Page = () => {
   const searchParams = useSuspenseSearchParams();
@@ -41,12 +40,9 @@ const Page = () => {
   // VID-20230429-WA0030-360p.mp4
 
   useEffect(() => {
-    
     const fetchVideo = () => {
       axios
-        .get(
-          `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/${fileName}`
-        )
+        .get(`${SERVER}/video/v/${fileName}`)
         // .get(
         //   `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/v/VID-20230429-WA0030`
         // )
@@ -57,18 +53,15 @@ const Page = () => {
           console.log("Error occurred while fetching the video file", error);
         });
     };
-    
-    if(fileName) fetchVideo();
 
+    if (fileName) fetchVideo();
   }, [fileName]);
 
   useEffect(() => {
     if (videoData) {
       const fetchVideoStatus = () => {
         axios
-          .get(
-            `https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/video/s/${videoData._id}`
-          )
+          .get(`${SERVER}/video/s/${videoData._id}`)
           .then((response) => {
             // console.log(response.data.data);
             setVideoStatus(response.data.data);
@@ -95,7 +88,7 @@ const Page = () => {
       // Clear the interval when component unmounts to avoid memory leaks
       return () => clearInterval(pollingInterval);
     }
-  }, [pollingCompleted, videoData,fileName]);
+  }, [pollingCompleted, videoData, fileName]);
 
   const handleDownload = async () => {
     if (videoStatus.progress !== "completed" || downloading) return;
@@ -108,17 +101,23 @@ const Page = () => {
       for (const resolution in videoData.videoResolutions) {
         const videoUrl = videoData.videoResolutions[resolution];
 
-        const res = await fetch(
-          `/api/videos?fileName=${fileName}&videoUrl=${videoUrl}`
+        // const res = await fetch(
+        //   `/api/videos?fileName=${fileName}&videoUrl=${videoUrl}`
+        // );
+
+        // if (!res.ok) {
+        //   throw new Error(`video fetching failed with status: ${res.status}`);
+        // }
+
+        // const { url } = await res.json();
+
+        // console.log(url);
+
+        const { data } = await axios.get(
+          `${SERVER}/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
         );
 
-        if (!res.ok) {
-          throw new Error(`video fetching failed with status: ${res.status}`);
-        }
-
-        const { url } = await res.json();
-
-        console.log(url);
+        const { url } = data;
 
         try {
           const response = await axios.get(url, {
@@ -152,15 +151,20 @@ const Page = () => {
       const urls: Record<string, string> = {};
       for (const resolution in videoData.videoResolutions) {
         const videoUrl = videoData.videoResolutions[resolution];
-        const res = await fetch(
-          `/api/videos?fileName=${fileName}&videoUrl=${videoUrl}`
+        // const res = await fetch(
+        //   `/api/videos?fileName=${fileName}&videoUrl=${videoUrl}`
+        // );
+
+        // if (!res.ok) {
+        //   throw new Error(`Video fetching failed with status: ${res.status}`);
+        // }
+
+        // const { url } = await res.json();
+        const { data } = await axios.get(
+          `${SERVER}/get-videos?fileName=${fileName}&videoUrl=${videoUrl}`
         );
 
-        if (!res.ok) {
-          throw new Error(`Video fetching failed with status: ${res.status}`);
-        }
-
-        const { url } = await res.json();
+        const { url } = data;
         urls[resolution] = url;
       }
       setPreviewUrls(urls);
@@ -258,12 +262,10 @@ const Page = () => {
   );
 };
 
-
 const SuspensePage = () => (
   <Suspense fallback={<div>Loading...</div>}>
     <Page />
   </Suspense>
 );
-
 
 export default SuspensePage;

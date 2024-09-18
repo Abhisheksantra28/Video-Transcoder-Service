@@ -8,8 +8,9 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { userExist} from "@/redux/reducer/userReducer";
+import { userExist } from "@/redux/reducer/userReducer";
 import { useDispatch } from "react-redux";
+import { SERVER } from "@/constants";
 
 const SignUpPage = () => {
   const router = useRouter();
@@ -21,10 +22,7 @@ const SignUpPage = () => {
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      window.open(
-        "https://ecezbkpsc5.execute-api.ap-south-1.amazonaws.com/api/v1/user/login",
-        "_self"
-      );
+      window.open(`${SERVER}/user/login`, "_self");
 
       dispatch(userExist(true));
     } catch (error: any) {

@@ -8,4 +8,4 @@ export const store = configureStore({
   },
 });
 
-export const server = process.env.SERVER;
+

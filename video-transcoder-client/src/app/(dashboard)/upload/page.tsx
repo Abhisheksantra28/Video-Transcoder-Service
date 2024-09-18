@@ -1,6 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { SERVER } from "@/constants";
+import axios from "axios";
 import { CameraIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -55,15 +57,21 @@ const Page = () => {
     try {
       const { name, type } = selectedFile;
 
-      const res = await fetch(
-        `/api/upload?fileName=${name}&contentType=${type}`
+      // const res = await fetch(
+      //   `/api/upload?fileName=${name}&contentType=${type}`
+      // );
+
+      // if (!res.ok) {
+      //   throw new Error(`Upload failed with status: ${res.status}`);
+      // }
+
+      // const { url } = await res.json(); // Get pre-signed URL from server
+
+      const { data } = await axios.get(
+        `${SERVER}/upload?fileName=${name}&contentType=${type}`
       );
 
-      if (!res.ok) {
-        throw new Error(`Upload failed with status: ${res.status}`);
-      }
-
-      const { url } = await res.json(); // Get pre-signed URL from server
+      const { url } = data;
 
       const upload = await fetch(url, {
         method: "PUT",
