@@ -239,8 +239,10 @@ const Page = () => {
             backgroundColor: "rgba(0,0,0,0.2)",
           },
           content: {
-            width: "36vw",
-            height: "56vh",
+            // width: "36vw",
+            // height: "56vh",
+            width:"auto",
+            height:"auto",
             margin: "auto", // Center the modal horizontally
             padding: "0px",
             border: "none",
