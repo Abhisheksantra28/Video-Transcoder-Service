@@ -160,7 +160,7 @@ import { CameraIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+const MAX_FILE_SIZE = 30 * 1024 * 1024; // 20 MB
 
 const Page = () => {
   const router = useRouter();
