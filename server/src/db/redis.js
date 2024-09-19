@@ -105,6 +105,16 @@ const getQueueLength = async () => {
   return await redis.llen(REDIS_KEYS.VIDEO_TRANSCODING_QUEUE);
 };
 
+// const resetRedis = async () => {
+//   try {
+//     await redis.flushdb(); // or use redis.flushdb() for the current database
+//     console.log("Redis has been reset successfully.");
+//   } catch (error) {
+//     console.error("Error resetting Redis:", error);
+//   }
+// };
+
+
 module.exports = {
   enqueueJobInQueue,
   deQueueJobFromQueue,

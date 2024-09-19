@@ -4,10 +4,7 @@ const { putObjectURL, getObjectURL } = require("../utils/s3SignedUrl.js");
 const uploadToTempBucketURL = async (req, res) => {
   const { fileName, contentType } = req.query;
 
-  console.log("fileName", fileName);
-
   const bucketName = process.env.TEMP_S3_BUCKET_NAME;
-  console.log("bucketName", bucketName);
 
   const url = await putObjectURL(fileName, contentType, bucketName);
 
@@ -22,7 +19,7 @@ const uploadToTempBucketURL = async (req, res) => {
     .json(new ApiResponse(200, url, "Signed URL generated successfully"));
 };
 
-const getFinalBucketvideoURL = async () => {
+const getFinalBucketvideoURL = async (req,res) => {
   const { fileName, videoUrl } = req.query;
 
   const key = `videos/${fileName}/${videoUrl}`;
