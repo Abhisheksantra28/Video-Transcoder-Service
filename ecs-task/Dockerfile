@@ -1,22 +1,19 @@
-FROM ubuntu:focal
+FROM node:18-alpine
 
-RUN apt-get update
-RUN apt-get install -y curl
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get upgrade -y
-RUN apt-get install -y nodejs
-
-RUN apt-get install -y ffmpeg 
+RUN apk update
+RUN apk upgrade
+RUN apk add --no-cache ffmpeg
 
 
 WORKDIR /app
 
+COPY package.json .
+COPY package-lock.json .
 
-COPY package*.json .
 RUN npm install
 
 COPY utils/ utils/
-COPY index.js index.js
+COPY index.js .
 
 
-CMD ["node", "index.js"]
+CMD [ "npm" , "start" ]

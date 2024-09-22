@@ -1,136 +1,216 @@
-const axios = require("axios");
-const path = require("path");
-const { generateSignedGetUrl, uploadFileToS3 } = require("./utils/s3Helper");
+// download the original video
 const {
-  downloadVideo,
-  runParallelFFmpegCommands,
-} = require("./utils/videoProcessing");
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+} = require("@aws-sdk/client-s3");
+const fsPromises = require("node:fs/promises");
+const fs = require("node:fs");
+const path = require("node:path");
+const ffmpeg = require("fluent-ffmpeg");
+const { spawn } = require("child_process");
+// const { Worker } = require("node:worker_threads");
+const { markTaskCompleted, markTaskFailed } = require("./utils/webhooks.js");
 
-const { VIDEO_PROCESS_STATES } = require("./utils/constants");
-
-require("dotenv").config();
-
-const markTaskCompleted = async (key, allFilesObjects) => {
-  try {
-    const webhook = process.env.WEBHOOK_URL;
-    console.log("Webhook URL:", webhook);
-    const response = await axios.post(webhook, {
-      key,
-      progress: VIDEO_PROCESS_STATES.COMPLETED,
-      videoResolutions: allFilesObjects,
-    });
-
-    if (response.status === 200) {
-      console.log("Webhook called successfully!");
-    }
-  } catch (error) {
-    console.log("Error while calling webhook:", error);
-    process.exit(1);
-  }
-};
-
-const markTaskFailed = async (key) => {
-  try {
-    const webhook = process.env.WEBHOOK_URL;
-    console.log("Webhook URL:", webhook);
-    const response = await axios.post(webhook, {
-      key,
-      progress: VIDEO_PROCESS_STATES.FAILED,
-      videoResolutions: {},
-    });
-
-    if (response.status === 200) {
-      console.log("Webhook called successfully");
-    }
-  } catch (error) {
-    console.log("Error while calling webhook:", error);
-    throw error;
-  }
-};
-
-let ffmpegCommands = [];
 let allFiles = [];
 
-let videoFormat = [
-  { name: "360p", scale: "w=480:h=360" },
-  { name: "480p", scale: "w=858:h=480" },
-  { name: "720p", scale: "w=1280:h=720" },
-  { name: "1080p", scale: "w=1920:h=1080" },
+const RESOLUTIONS = [
+  { name: "360p", width: 480, height: 360 },
+  { name: "480p", width: 858, height: 480 },
+  { name: "720p", width: 1280, height: 720 },
+  { name: "1080p", width: 1920, height: 1080 },
 ];
 
-(async function () {
+const s3client = new S3Client({
+  region: "ap-south-1",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+// const BUCKET_NAME = process.env.BUCKET_NAME;
+const KEY = process.env.OBJECT_KEY;
+const bucketName = process.env.TEMP_S3_BUCKET_NAME;
+const finalBucketName = process.env.FINAL_S3_BUCKET_NAME;
+
+const videoName = KEY.split("/").pop();
+const originalFileName = videoName.split(".")[0]; // Remove file extension
+
+async function init() {
   try {
-    console.log("Starting.....");
-
-    const videoToProcess = process.env.OBJECT_KEY;
-    const key = videoToProcess;
-    const bucketName = process.env.TEMP_S3_BUCKET_NAME;
-    const finalBucketName = process.env.FINAL_S3_BUCKET_NAME;
-
-    if (!videoToProcess) {
-      console.error(
-        "Missing environment variable: OBJECT_KEY Please set the environment variable with the video name you want to process."
-      );
-      process.exit(1);
-    }
-
-    const url = await generateSignedGetUrl({ key, bucketName });
-
-    if (!url) {
-      console.log(
-        "Failed to generate pre-signed URL for video. Please check your configuration and network connectivity."
-      );
-      process.exit(1);
-    }
-
-    console.log("getURL: ", url);
-    const videoName = key.split("/").pop();
-    const outputVideoName = videoName.split(".")[0]; // Remove file extension
-    // const outputVideoName = removeFileExtension(videoToProcess);
-
-    console.log("testing....");
-    const desiredPath = path.join(__dirname, "downloads"); // Example path construction
-    await downloadVideo(url, desiredPath);
-    // await downloadVideo(url, videoToProcess);
-
-    videoFormat.forEach((format) => {
-      ffmpegCommands.push(
-        `ffmpeg -i ${path.join(
-          desiredPath,
-          videoName
-        )} -y -acodec aac -vcodec libx264 -filter:v scale=${
-          format.scale
-        } -f mp4 ${outputVideoName + "-" + format.name}.mp4`
-      );
-
-      allFiles.push(`${outputVideoName + "-" + format.name}.mp4`);
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: KEY,
     });
 
-    await runParallelFFmpegCommands(ffmpegCommands);
+    const response = await s3client.send(command);
+    const originalFilePath = `original-video.mp4`;
+    await fsPromises.writeFile(originalFilePath, response.Body);
+    console.log("Downloaded the original video");
+    const originalVideoPath = path.resolve(originalFilePath);
 
-    console.log(allFiles);
+    /*
+    // start transcoder
+    const promises = RESOLUTIONS.map((resolution) => {
+      const output = `${originalFileName}-${resolution.name}.mp4`;
 
-    let uploadPromises = [];
-    allFiles.map((file) => {
-      uploadPromises.push(
-        uploadFileToS3(desiredPath, outputVideoName, file, finalBucketName)
-      );
-    });
+      return new Promise((resolve, reject) => {
+      
+        ffmpeg(originalVideoPath)
+          .output(output)
+          .videoCodec("libx264")
+          .audioCodec("aac")
+          .size(`${resolution.width}x${resolution.height}`)
+          .on("end", async () => {
+            // upload the video to s3
+            console.log(`Transcoded video to ${resolution.name}`);
+            try {
+              console.log("Uploading transcoded video to S3....");
+              const putCommand = new PutObjectCommand({
+                Bucket: finalBucketName,
+                Key: `videos/${originalFileName}/${output}`,
+                Body: fs.createReadStream(path.resolve(output)),
+                ContentType: "video/mp4",
+              });
+              await s3client.send(putCommand);
+              console.log("Uploaded transcoded video to S3");
 
-    console.log("Uploading files to S3:");
+              allFiles.push(output);
 
-    if (uploadPromises.length === 0) {
-      console.log("No files to upload.");
-    } else if (uploadPromises.length === 1) {
-      console.log("Uploading 1 file: ", uploadPromises[0]);
-    } else {
-      console.log(`Uploading ${uploadPromises.length} files:`);
-      uploadPromises.forEach((promise, index) => {
-        console.log(` - File ${index + 1}: ${promise}`);
+              resolve();
+            } catch (uploadError) {
+              console.error(
+                "Error uploading transcoded video to S3:",
+                uploadError
+              );
+              reject(uploadError);
+            } finally {
+              // Clean up the local transcoded video file
+              fs.unlink(output, (err) => {
+                if (err) console.error(`Error deleting file ${output}:`, err);
+              });
+            }
+          })
+          .format("mp4")
+          .run();
       });
-    }
+    });
 
-    const results = await Promise.allSettled(uploadPromises);
+
+    */
+
+    // Process each resolution in parallel
+    const promises = RESOLUTIONS.map((resolution) => {
+      const output = `${originalFileName}-${resolution.name}.mp4`;
+      return new Promise((resolve, reject) => {
+        const ffmpegArgs = [
+          "-i",
+          originalVideoPath,
+          "-c:v",
+          "libx264",
+          "-c:a",
+          "aac",
+          "-s",
+          `${resolution.width}x${resolution.height}`,
+          output,
+        ];
+
+        const transcodingProcess = spawn("ffmpeg", ffmpegArgs);
+
+        // Capture ffmpeg's stderr for logging
+        // transcodingProcess.stderr.on("data", (data) => {
+        //   console.log(`Transcoding ${resolution.name}: ${data}`);
+        // });
+
+        transcodingProcess.on("error", (error) => {
+          console.error(`Error transcoding ${resolution.name}:`, error);
+          reject(error);
+        });
+
+        transcodingProcess.on("close", async (code) => {
+          if (code === 0) {
+            console.log(`Transcoding to ${resolution.name} completed.`);
+
+            try {
+              // Upload transcoded file to S3
+              console.log(`Uploading ${output} video to S3...`);
+              const putCommand = new PutObjectCommand({
+                Bucket: finalBucketName,
+                Key: `videos/${originalFileName}/${output}`,
+                Body: fs.createReadStream(path.resolve(output)),
+                ContentType: "video/mp4",
+              });
+              await s3client.send(putCommand);
+              console.log(`Uploaded ${resolution.name} video to S3`);
+              allFiles.push(output);
+              resolve();
+            } catch (uploadError) {
+              console.error(`Error uploading ${resolution.name}:`, uploadError);
+              reject(uploadError);
+            } finally {
+              // Clean up local transcoded video file
+              fs.unlink(output, (err) => {
+                if (err) console.error(`Error deleting file ${output}:`, err);
+              });
+            }
+          } else {
+            reject(
+              new Error(
+                `Transcoding ${resolution.name} failed with code ${code}`
+              )
+            );
+          }
+        });
+      });
+    });
+
+    /*
+    // Spawn workers for each resolution
+    const promises = RESOLUTIONS.map((resolution) => {
+      return new Promise((resolve, reject) => {
+        const worker = new Worker("./utils/transcodeWorker.js", {
+          workerData: {
+            originalVideoPath,
+            resolution,
+            output: `${originalFileName}-${resolution.name}.mp4`,
+          },
+        });
+
+        worker.on("message", async (output) => {
+          try {
+            console.log(
+              `Uploading transcoded video (${resolution.name}) to S3...`
+            );
+            // Ensure the file exists before uploading
+            if (!fs.existsSync(output)) {
+              throw new Error(`File ${output} does not exist.`);
+            }
+
+            const putCommand = new PutObjectCommand({
+              Bucket: finalBucketName,
+              Key: `videos/${originalFileName}/${output}`,
+              Body: fs.createReadStream(path.resolve(output)),
+              ContentType: "video/mp4",
+            });
+            await s3client.send(putCommand);
+            console.log(`Uploaded ${output} to S3`);
+            resolve(output);
+          } catch (err) {
+            reject(err);
+          }
+        });
+
+        worker.on("error", (err) => reject(err));
+        worker.on("exit", (code) => {
+          if (code !== 0) {
+            reject(new Error(`Worker stopped with exit code ${code}`));
+          }
+        });
+      });
+    });
+*/
+    const results = await Promise.allSettled(promises);
 
     const allSuccessful = results.every(
       (result) => result.status === "fulfilled"
@@ -153,7 +233,7 @@ let videoFormat = [
         }
       });
 
-      markTaskCompleted(key, allFilesObject);
+      markTaskCompleted(KEY, allFilesObject);
     } else {
       const failedResults = results.filter(
         (result) => result.status === "rejected"
@@ -175,12 +255,15 @@ let videoFormat = [
         );
       }
 
-      markTaskFailed(key);
+      markTaskFailed(KEY);
 
       process.exit(1);
     }
-  } catch (error) {
-    console.log("Error:", error);
+  } catch (err) {
+    console.error(err);
+    markTaskFailed(KEY);
     process.exit(1);
   }
-})();
+}
+
+init();
