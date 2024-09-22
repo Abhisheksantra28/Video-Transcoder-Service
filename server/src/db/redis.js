@@ -114,6 +114,8 @@ const getQueueLength = async () => {
 //   }
 // };
 
+// resetRedis()
+
 
 module.exports = {
   enqueueJobInQueue,

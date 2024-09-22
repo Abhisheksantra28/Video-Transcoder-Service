@@ -1,3 +1,4 @@
+
 const VIDEO_PROCESS_STATES = {
     PENDING: "pending",
     QUEUED: "queued",
@@ -18,3 +19,4 @@ const VIDEO_PROCESS_STATES = {
     REDIS_KEYS,
     DB_NAME
   };
+
