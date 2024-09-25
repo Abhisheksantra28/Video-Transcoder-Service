@@ -20,6 +20,11 @@ https://github.com/Abhisheksantra28/Video-Transcoder-Service/assets/108479463/24
 - [Improvements](#improvements)
 
 
+## Architecture
+
+![Video Transcoder Service System Design](https://github.com/user-attachments/assets/14cbd7d1-3a13-4f71-a768-37f2d6d380e9)
+
+
 
 
 
