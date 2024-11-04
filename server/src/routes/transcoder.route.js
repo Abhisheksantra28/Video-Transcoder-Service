@@ -19,8 +19,8 @@ const router = Router();
 router.post("/s3-trigger", handleS3Trigger);
 router.post("/ecs-trigger", handleECSTrigger);
 
-router.get("/get-upload-url", uploadToTempBucketURL);
-router.get("/get-video-urls", getFinalBucketvideoURL);
+router.get("/get-upload-url",isAuthenticated, uploadToTempBucketURL);
+router.get("/get-video-urls",isAuthenticated, getFinalBucketvideoURL);
 
 router.get("/get-all-videos", isAuthenticated, getAllVideos);
 router.get("/v/:fileName",isAuthenticated, getVideoByFileName);
