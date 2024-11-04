@@ -9,7 +9,7 @@ const isAuthenticated = asyncHandler(async (req, _, next) => {
     //   req.header("Authorization")?.replace("Bearer ", "");
 
     console.log(req.cookies);
-    const token = req.cookies?.["connect.sid"];
+    const token = req.cookies["connect.sid"];
 
     if (!token) {
       throw new ApiError(401, "Unauthorized request");
